@@ -1,0 +1,28 @@
+{
+  "name": "BeamIt_Dev",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+
+  "customizations": {
+
+    "vscode": {
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash"
+      },
+
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-azuretools.vscode-docker",
+        // "ckolkman.vscode-postgres",
+        // "cweijan.vscode-redis-client",
+        // "42crunch.vscode-openapi",
+        // "mongodb.mongodb-vscode",
+        // "jeppeandersen.vscode-kafka",
+        "/tmp/bee-c4-dsl-extension.vsix"
+      ]
+      
+    }
+  }
+}
