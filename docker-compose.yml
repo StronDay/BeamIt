@@ -1,0 +1,12 @@
+services:
+  api:
+    container_name: api
+    build:
+      context: ./services/api
+      dockerfile: Dockerfile
+    volumes:
+      - ./services/api/:/api/
+    ports:
+      - 5010:5010
+    env_file:
+      - .env

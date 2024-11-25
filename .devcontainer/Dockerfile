@@ -26,15 +26,16 @@ RUN apt-get update && apt-get install -y \
     libfontconfig1 \
     libfreetype6 \
     libxi6 \
+    tree \
     # postgresql \ 
     # postgresql-contrib \
     && rm -rf /var/lib/apt/lists/*
 
-# COPY requirements.txt /tmp/requirements.txt
-# RUN pip install --no-cache-dir -r requirements.txt /tmp/requirements.txt
-
 COPY . .
 COPY ./.devcontainer/extensions/bee-c4-dsl-extension.vsix /tmp/
+
+COPY ./services/api/requirements.txt /tmp/api/requirements.txt
+RUN pip install --no-cache-dir -r /tmp/api/requirements.txt
 
 RUN apt-get update && apt-get install -y zsh git curl
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"

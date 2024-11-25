@@ -93,7 +93,7 @@ workspace {
             # API Gateway
             apiGateway = container "API Gateway" {
                 description "Объединяет клиентские запросы и перенаправляет их к сервисам."
-                technology "Flask/Python"
+                technology "FastApi/Python"
 
                 apiGateway -> messengerController "Маршрутизирует запросы к мессенджеру" "HTTPs"
                 apiGateway -> authService "Авторизируется/получает токен" "HTTPs"

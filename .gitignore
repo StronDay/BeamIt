@@ -3,3 +3,5 @@
 workspace.json
 structurizr/themes
 structurizr/images
+.env
+__pycache__
