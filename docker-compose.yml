@@ -1,4 +1,38 @@
+networks:
+  app_network:
+    driver: bridge
+  db_network:
+    driver: bridge
+
 services:
+
+  postgres:
+    image: postgres:16.1
+    container_name: data_base
+    volumes:
+      - ./data_base:/var/lib/postgresql/data/
+    expose:
+      - POSTGRES_PORT
+    env_file:
+      - .env
+    networks:
+      - db_network
+  
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pg_admin
+    ports:
+      - 5050:60
+    volumes:
+      - ./pg_admin:/var/lib/pgadmin
+    env_file:
+      - .env
+    networks:
+      - db_network
+    depends_on:
+      - postgres
+
   api:
     container_name: api
     build:
@@ -10,3 +44,22 @@ services:
       - 5010:5010
     env_file:
       - .env
+    networks:
+      - app_network
+  
+  user_service:
+    container_name: user_service
+    build:
+      context: ./services/user_service
+      dockerfile: Dockerfile
+    volumes:
+      - ./services/user_service/:/user_service/
+    ports:
+      - 5001:5001
+    env_file:
+      - .env
+    networks:
+      - app_network
+      - db_network
+    depends_on:
+      - postgres

@@ -5,3 +5,5 @@ structurizr/themes
 structurizr/images
 .env
 __pycache__
+pg_admin
+data_base
