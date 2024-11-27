@@ -46,6 +46,20 @@ services:
       - .env
     networks:
       - app_network
+
+  cipher_service:
+    container_name: cipher_service
+    build:
+      context: ./services/cipher_service
+      dockerfile: Dockerfile
+    volumes:
+      - ./services/cipher_service/:/cipher_service/
+    ports:
+      - 5002:5002
+    env_file:
+      - .env
+    networks:
+      - app_network
   
   user_service:
     container_name: user_service
