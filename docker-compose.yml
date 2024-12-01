@@ -77,3 +77,20 @@ services:
       - db_network
     depends_on:
       - postgres
+
+  auth_service:
+    container_name: auth_service
+    build:
+      context: ./services/auth_service
+      dockerfile: Dockerfile
+    volumes:
+      - ./services/auth_service/:/auth_service/
+    ports:
+      - 5003:5003
+    env_file:
+      - .env
+    networks:
+      - app_network
+      - db_network
+    depends_on:
+      - postgres

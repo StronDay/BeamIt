@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
     curl \ 
     wrk \
     iputils-ping \
+    libpq-dev \
     libxtst6 \
     libxrender1 \
     libx11-6 \
@@ -27,18 +28,26 @@ RUN apt-get update && apt-get install -y \
     libfreetype6 \
     libxi6 \
     tree \
-    # postgresql \ 
-    # postgresql-contrib \
+    postgresql \ 
+    postgresql-contrib \
     && rm -rf /var/lib/apt/lists/*
 
 COPY . .
 COPY ./.devcontainer/extensions/bee-c4-dsl-extension.vsix /tmp/
 
 COPY ./services/api/requirements.txt /tmp/api/requirements.txt
+COPY ./services/auth_service/requirements.txt /tmp/auth_service/requirements.txt
+COPY ./services/cipher_service/requirements.txt /tmp/cipher_service/requirements.txt
 COPY ./services/user_service/requirements.txt /tmp/user_service/requirements.txt
 
-RUN pip install --no-cache-dir -r /tmp/api/requirements.txt
+# RUN pip install --no-cache-dir -r /tmp/api/requirements.txt
 # RUN pip install --no-cache-dir -r /tmp/user_service/requirements.txt
+
+RUN pip install --no-cache-dir \
+    -r /tmp/api/requirements.txt \
+    -r /tmp/auth_service/requirements.txt \
+    -r /tmp/cipher_service/requirements.txt \
+    -r /tmp/user_service/requirements.txt
 
 RUN apt-get update && apt-get install -y zsh git curl
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"

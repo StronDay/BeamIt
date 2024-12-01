@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify, current_app
+import hashlib
 from app.utils.cipher import CipherUtils
 
 cipher_route = Blueprint("cipher", __name__)
@@ -6,6 +7,7 @@ cipher_route = Blueprint("cipher", __name__)
 @cipher_route.route("/encrypt", methods=["POST"])
 def encrypt_message():
     data = request.json
+    
     plaintext = data.get("message")
     if not plaintext:
         return jsonify({"error": "Message is required"}), 400
@@ -30,3 +32,16 @@ def decrypt_message():
         return jsonify({"decrypted_message": decrypted_message}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+    
+@cipher_route.route("/hashing", methods=["POST"])
+def hash_message():
+    data = request.json
+    
+    plaintext = data.get("message")
+    if not plaintext:
+        return jsonify({"error": "Message is required"}), 400
+
+    hashed_message = hashlib.sha256(plaintext.encode()).hexdigest()
+
+    return jsonify({"hashed_message": hashed_message}), 200
+

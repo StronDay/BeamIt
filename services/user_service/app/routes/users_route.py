@@ -49,7 +49,6 @@ def get_user(user_id):
     try:
 
         user = UsersModel.query.filter_by(user_id=user_id).first()
-        
         if not user:
             return jsonify({"error": "User not found"}), 404
 
@@ -58,6 +57,25 @@ def get_user(user_id):
             "login": user.login,
             "email": user.email
         }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@users_route.route("/users/get_users", methods=['GET'])
+def get_users():
+    try:
+        
+        users = UsersModel.query.all()
+        users_list = [
+            {
+                "user_id": user.user_id,
+                "login": user.login,
+                "email": user.email
+            }
+            for user in users
+        ]
+
+        return jsonify({"users": users_list}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

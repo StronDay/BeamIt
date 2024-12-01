@@ -6,7 +6,7 @@ load_dotenv()
 class Config(object):
     
     DEBUG = True
-
+    
     db_name = os.getenv('POSTGRES_DB')
     db_user = os.getenv('POSTGRES_USER')
     db_pass = os.getenv('POSTGRES_PASSWORD')
@@ -16,3 +16,6 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI =  f'postgresql://{db_user}:{db_pass}@data_base:{db_port}/{db_name}'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    algorithm = os.getenv('JWT_ALGORITHM')
+    access_key = os.getenv('JWT_ACCESS_KEY')
+    refresh_key = os.getenv('JWT_REFRESH_KEY')
