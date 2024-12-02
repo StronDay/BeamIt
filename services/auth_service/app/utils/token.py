@@ -52,9 +52,9 @@ class Token():
             
             return True
 
-        except IntegrityError as e:
-            data_base.session.rollback()
-            return {"error": "User not found, invalid user_id"}, 400
+        # except IntegrityError as e:
+        #     data_base.session.rollback()
+        #     return {"error": "User not found, invalid user_id"}, 400
         except Exception as e:
             data_base.session.rollback()
             return {"error": str(e)}, 500

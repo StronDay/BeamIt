@@ -24,3 +24,13 @@ def create_new_user(data_base, login, encrypted_passwd, email):
     except SQLAlchemyError as db_err:
         data_base.session.rollback()
         raise db_err
+    
+def get_user_password(login):
+    user = UsersModel.query.filter(
+        (UsersModel.login == login) | (UsersModel.email == login)
+    ).first()
+    
+    if user:
+        return user.passwd
+    else:
+        return None

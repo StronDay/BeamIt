@@ -5,7 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from ..models import UsersModel
 from ..models import data_base
 
-from ..utils import is_user_existing, encrypt_password, create_new_user
+from ..utils import is_user_existing, encrypt_password, create_new_user, get_user_password
 
 CIPHER_SERVICE_URL = "http://cipher_service:5002"
 
@@ -14,7 +14,6 @@ users_route = Blueprint('users_route', __name__)
 @users_route.route("/users/create_user", methods=["POST"])
 def create_user():
     try:
-
         user_data = request.json
         login = user_data.get("login")
         passwd = user_data.get("password")
@@ -36,26 +35,51 @@ def create_user():
                 "login": new_user.login,
                 "email": new_user.email
             }
-        }), 201
+        }), 200
 
     except ConnectionError as e:
         return jsonify({"error": str(e)}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+# verify_password
 
-
-@users_route.route("/users/get_user/<user_id>", methods=['GET'])
-def get_user(user_id):
+@users_route.route("/users/verify_password", methods=['GET'])
+def verify_password():
     try:
+        user_data = request.get_json()
+        if not user_data:
+            return jsonify({"error": "Missing JSON body"}), 400
 
-        user = UsersModel.query.filter_by(user_id=user_id).first()
+        login = user_data.get("login")
+        password = user_data.get("password")
+
+        if not login or not password:
+            return jsonify({"error": "Both 'login' and 'password' are required"}), 400
+        
+        data_base_password = get_user_password(login)
+        if not data_base_password:
+            return data_base_password
+        
+        encrypted_passwd = encrypt_password(CIPHER_SERVICE_URL, password)
+        
+        if encrypted_passwd == data_base_password:
+            return jsonify({"verify": "true"}), 200
+        else:
+            return jsonify({"verify": "false"}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+@users_route.route("/users/get_user/<login>", methods=['GET'])
+def get_user(login):
+    try:
+        user = UsersModel.query.filter_by(login=login).first()
         if not user:
             return jsonify({"error": "User not found"}), 404
 
         return jsonify({
             "user_id": user.user_id,
-            "login": user.login,
-            "email": user.email
         }), 200
 
     except Exception as e:
