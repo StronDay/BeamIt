@@ -8,103 +8,65 @@ workspace {
 
         beamit = softwareSystem "BeamIt" {
 
-            # Контейнер для фронтенда
-            webApp = container "Web Application" {
-                description "Интерфейс для взаимодействия пользователей с мессенджером."
-                technology "HTML/CSS"
+            !include client_model.dsl
+            !include auth_model.dsl
+            !include users_model.dsl
 
-                registrationForm = component "Форма регистрации/авторизации" {
-                    description "Позволяет пользователям зарегистрироваться и войти в систему."
-
-                }
-
-                messengerForm = component "Форма мессенджера" {
-                    description "Отображает сообщения и позволяет их отправлять."
-                }
-
-                chatForm = component "Форма чатов" {
-                    description "Управление групповыми и PtP чатами."
-                }
-
-                user -> registrationForm "Использует"
-
-                user -> messengerForm "Использует"
-
-                user -> chatForm "Использует"
+            api_gateway = container "ApiGeteway" {
+                description "Распределяет клиентские запросы по сервисам"
+                technology "FastApi/Python"
             }
 
-            //user -> webApp "Взаимодействует"
+            user -> registration_form "Использует"
+            user -> messenger_form "Использует"
+            user -> chat_form "Использует"
 
-            # База данных
-            database = container "PostgreSQL Database" {
-                description "Хранит информацию о пользователях, чатах и сообщениях."
+            registration_form -> api_gateway "Отправляет данные" "HTTPs"
+            messenger_form -> api_gateway "Отправляет данные" "HTTPs"
+            chat_form -> api_gateway "Отправляет данные" "HTTPs"
+
+            users_data_base = container "Users DB" {
+                description "База данных которая хранит данные пользователей"
                 technology "PostgreSQL"
             }
 
-            # Микросервис аутентификации
-            authService = container "Auth Service" {
-                description "Управляет входом пользователей и токенами безопасности."
+            messege_data_base = container "Messege DB" {
+                description "База данных которая хранит данные чатов и сообщений"
+                technology "PostgreSQL"
+            }
+
+            cipher_service = container "Cipher" {
+                description "Обеспечивает работу с алгоритмами шифрования"
                 technology "Flask/Python"
-
-                authService -> database "Сохраняет и извлекает данные пользователей и их аутентификацию." "SQL"
             }
 
-            # Микросервис мессенджера
-            messengerService = container "Messenger Service" {
-                description "Обрабатывает отправку и получение сообщений."
+            messege_service = container "Messege" {
+                description "Обеспечивает отправку/чтение сообщений"
                 technology "Flask/Python"
-
-                encryptService = component "Encrypt" {
-                    description "Отвечает за шифрование/расшифровку сообщений."
-                    technology "Flask/Python"
-                }
-
-                messengerModel = component "Model" {
-                    description "Содержит ORM-модели для работы с базой данных."
-                    technology "Flask/Python"
-
-                    -> database "Сохраняет сообщения." "SQL"
-                }
-
-                messageHandlersService = component "messageHandlers" {
-                    description "Отвечает за Обработку собщений."
-                    technology "Flask/Python"
-
-                    -> encryptService "Шифрует сообщение"
-                    -> messengerModel "Отправляет сообщение на запиь в базу данных"
-                }
-
-                messengerController = component "Controller" {
-                    description "Отвечает за обработку HTTP-запросов и передачу их на уровень бизнес-логики."
-                    technology "Flask/Python"
-
-                    -> messageHandlersService "отправляет сообщение на обработку"
-                }
             }
 
-            # Микросервис чатов
-            chatService = container "Chat Service" {
-                description "Управляет чатом и его участниками."
+            chat_service = container "Chat" {
+                description "Обеспечивает управление чатам сервиса"
                 technology "Flask/Python"
-
-                chatService -> database "Управляет данными чатов и участниками." "SQL"
             }
 
-            # API Gateway
-            apiGateway = container "API Gateway" {
-                description "Объединяет клиентские запросы и перенаправляет их к сервисам."
-                technology "FastApi/Python"
+            api_gateway -> auth_router "Авторизация/Аутентификация/Проверка токена" "HTTPs"
+            api_gateway -> users_router "Получение информации о пользователях" "HTTPs"
 
-                apiGateway -> messengerController "Маршрутизирует запросы к мессенджеру" "HTTPs"
-                apiGateway -> authService "Авторизируется/получает токен" "HTTPs"
-                apiGateway -> chatService "Маршрутизирует запросы для чатов" "HTTPs"
-            }
+            api_gateway -> messege_service "Пересылка сообщений" "HTTPs"
+            api_gateway -> chat_service "Управлние чатами" "HTTPs"
 
-            registrationForm -> apiGateway "Отправляет данные" "HTTPs"
-            messengerForm -> apiGateway "Отправляет данные" "HTTPs"
-            chatForm -> apiGateway "Отправляет данные" "HTTPs"
+            messege_service -> cipher_service "Шифрование/Дешифрование сообщений" "HTTPs"
+            messege_service -> messege_data_base "Запись/Чтение данных о сообщениях" "SQL"
+            chat_service -> messege_data_base "Запись/Чтение данных о чатах" "SQL"
 
-            webApp -> apiGateway "Перенаправляет запросы API" "HTTPs"
+            auth_controller -> users_router "Получение информации о пользователях" "HTTps"
+            auth_controller -> cipher_service "Шифрует/Дешифрует необходимые данные"
+
+            user_controller -> cipher_service "Шифрует/Дешифрует необходимые данные"
+
+            token_model -> users_data_base "Запись/Чтение данных о токенах" "SQL"
+            users_model -> users_data_base "Запись/Чтение данных о пользователях" "SQL"
         }
     }
 
@@ -123,34 +85,40 @@ workspace {
             autolayout lr
         }
 
-        component webApp {
+        component web_app {
             include *
             autolayout lr
         }
 
-        component messengerService {
+        component auth_service {
             include *
             autolayout lr
         }
 
-        dynamic webApp {
-            description "Последовательность авторизации пользователя"
+        component users_service {
+            include *
+            autolayout lr
+        }
+
+        dynamic web_app {
+            description "Последовательность регистрации пользователя"
             autolayout lr
 
-            user -> messengerForm "Написал сообщение в чат другому пользователю и нажал кнопку отправить"
-            messengerForm -> apiGateway "Пересылает сообщение по HTTPs"
+            user -> registration_form "Заполнил данные регистрации"
+            registration_form -> api_gateway "POST [/api/registration] Пересылает данные регистрации пользователя по HTTPs"
 
-            apiGateway -> authService "Запрос аутентификации"
-            authService -> database "Проверка данных пользователя"
-            database -> authService "Возврат результата"
-            authService -> apiGateway "Ответ с токеном"
+            api_gateway -> auth_router "POST [auth/registration] Передаёт данные пользователя"
+            auth_router -> auth_controller "Передат данные для обработки"
 
-            apiGateway -> messengerController "Передача передаёт сообщение в сервис обработки сообщений"
-            messengerController -> messageHandlersService "Отдаёт сообщение обработчику"
-            messageHandlersService -> encryptService "Отправляет сообщение в исходном виде"
-            encryptService -> messageHandlersService "Отправляет зашифрованое сообщение"
-            messageHandlersService -> messengerModel "Отправляет сообщение для записи в базу данных"
-            messengerModel -> database "Записывает сообщение в базу даных"
+            auth_controller -> cipher_service "Хеширует пароль"
+            auth_controller -> users_router "Передаёт данные для создания пользователя"
+            
+            users_router -> user_controller "Передаёт данные для обработки"
+            user_controller -> users_util "Создаёт пользователя"
+            users_util -> users_model "Проверяет наличия пользователя в бд и при отсутсвии создаёт"
+            users_model -> users_data_base "Добавляет зпись о новом пользователе"
+
+            auth_controller -> token_util "Создаёт access и refresh токены и сохраняет их"
         }
     }
 
