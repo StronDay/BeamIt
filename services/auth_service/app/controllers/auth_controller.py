@@ -1,6 +1,7 @@
 from flask import jsonify
-from app.utils.token_util import TokenUtil
 import requests
+
+from app.utils.token_util import TokenUtil
 
 USER_SERVICE_URL = "http://user_service:5001"
 

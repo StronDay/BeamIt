@@ -1,19 +1,20 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Cookie, Response
 from fastapi.responses import JSONResponse
 import requests
+import requests.cookies
 
 AUTH_SERVICE_URL = "http://auth_service:5003"
 
 auth_route = APIRouter()
 
 @auth_route.post("/api/registration")
-async def registration(user_data: dict):
+async def registration(user_data: dict, response: Response):
     
-    response = requests.post(f"{AUTH_SERVICE_URL}/registration", json=user_data)
-    if response.status_code != 200:
-        raise HTTPException(status_code=response.status_code, detail=response.json())
+    auth_response = requests.post(f"{AUTH_SERVICE_URL}/registration", json=user_data)
+    if auth_response.status_code != 200:
+        raise HTTPException(status_code=auth_response.status_code, detail=auth_response.json())
     
-    refresh_token = response.json().get("refresh_token")
+    refresh_token = auth_response.json().get("refresh_token")
     if not refresh_token:
         raise HTTPException(status_code=400, detail="refresh token not found in response")
     
@@ -24,16 +25,16 @@ async def registration(user_data: dict):
         max_age=7200
     )
     
-    return response.json()
+    return auth_response.json()
 
 @auth_route.post("/api/login")
-async def login(user_data: dict):
+async def login(user_data: dict, response: Response):
     
-    response = requests.post(f"{AUTH_SERVICE_URL}/login", json=user_data)
-    if response.status_code != 200:
-        raise HTTPException(status_code=response.status_code, detail=response.json())
+    auth_response = requests.post(f"{AUTH_SERVICE_URL}/login", json=user_data)
+    if auth_response.status_code != 200:
+        raise HTTPException(status_code=auth_response.status_code, detail=auth_response.json())
     
-    refresh_token = response.json().get("refresh_token")
+    refresh_token = auth_response.json().get("refresh_token")
     if not refresh_token:
         raise HTTPException(status_code=400, detail="refresh token not found in response")
     
@@ -44,13 +45,19 @@ async def login(user_data: dict):
         max_age=7200
     )
     
-    return response.json()
+    return auth_response.json()
+
+# refresh_token: str = Cookie(None)
 
 @auth_route.post("/api/logout")
-async def logout(user_data: dict):
+async def logout(refresh_token: str = Cookie(None)):
     
-    response = requests.post(f"{AUTH_SERVICE_URL}/logout", json=user_data)
+    response = requests.post(f"{AUTH_SERVICE_URL}/refresh/{refresh_token}")
     if response.status_code != 200:
         raise HTTPException(status_code=response.status_code, detail=response.json())
     
     return response.json()
+
+@auth_route.post("/api/refresh")
+async def refresh():
+    pass

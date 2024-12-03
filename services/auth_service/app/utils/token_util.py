@@ -33,6 +33,15 @@ class TokenUtil():
         token = jwt.encode(payload, self._refresh_key, self._algorithm)
         return token
     
+    def inspectRefresh(self, refresh_token):
+        
+        token = jwt.decode(refresh_token, self._access_key, self._algorithm)
+        return token
+
+    def inspectAccess(self, access_token):
+        
+        token = jwt.decode(access_token, self._access_key, self._algorithm)
+        return token
 
     def saveToken(self, user_id, refresh_token):
         try:

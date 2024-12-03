@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
 from app.controllers.auth_controller import AuthController
 
 auth_route = Blueprint("auth_route", __name__)
