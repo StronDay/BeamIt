@@ -11,6 +11,6 @@ def registration():
 def login():
     return AuthController.login(request.get_json())
 
-@auth_route.route("/logout", methods=['POST'])
-def logout():
-    return AuthController.logout(request.get_json())
+@auth_route.route("/logout/<refresh_token>", methods=['POST'])
+def logout(refresh_token):
+    return AuthController.logout(refresh_token)

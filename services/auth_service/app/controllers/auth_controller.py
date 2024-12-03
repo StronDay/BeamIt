@@ -81,5 +81,6 @@ class AuthController():
             "refresh_token": refresh_token
         }), 200
     
-    def logout(user_data: dict):
-        return jsonify({"messege": "hello from AuthController[logout]"}), 200
+    def logout(refresh_token):
+        token_util = TokenUtil()
+        return token_util.delete_token(refresh_token)

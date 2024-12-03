@@ -34,14 +34,40 @@ class TokenUtil():
         return token
     
     def inspectRefresh(self, refresh_token):
-        
-        token = jwt.decode(refresh_token, self._access_key, self._algorithm)
-        return token
+        try:
+            return jwt.decode(refresh_token, self._refresh_key, self._algorithm)
+        except Exception as e:
+            return None
 
     def inspectAccess(self, access_token):
+        try:
+            return jwt.decode(access_token, self._access_key, self._algorithm)
+        except Exception as e:
+            return None
         
-        token = jwt.decode(access_token, self._access_key, self._algorithm)
-        return token
+    def find_token(self, refresh_token):
+        token = TokenModel.query.filter_by(refresh_token=refresh_token).first()
+        if not token:
+            return None
+        
+        token_data = token.to_dict()
+        return self.inspectRefresh(token_data["refresh_token"])
+    
+    def delete_token(self, refresh_token):
+        try:
+            # Находим запись по значению токена
+            token_record = TokenModel.query.filter_by(refresh_token=refresh_token).first()
+            
+            if token_record:
+                data_base.session.delete(token_record)  # Удаляем запись
+                data_base.session.commit()  # Сохраняем изменения
+                return {"message": refresh_token}, 200
+            else:
+                return {"error": "Token not found"}, 404
+
+        except Exception as e:
+            data_base.session.rollback()  # Откатываем сессию в случае ошибки
+            return {"error": str(e)}, 500
 
     def saveToken(self, user_id, refresh_token):
         try:
