@@ -30,19 +30,13 @@ def create_user():
 
         return jsonify({
             "message": "User created successfully",
-            "user": {
-                "user_id": new_user.user_id,
-                "login": new_user.login,
-                "email": new_user.email
-            }
+            "user_id": new_user.user_id
         }), 200
 
     except ConnectionError as e:
         return jsonify({"error": str(e)}), 500
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
-# verify_password
 
 @users_route.route("/users/verify_password", methods=['GET'])
 def verify_password():
@@ -64,9 +58,9 @@ def verify_password():
         encrypted_passwd = encrypt_password(CIPHER_SERVICE_URL, password)
         
         if encrypted_passwd == data_base_password:
-            return jsonify({"verify": "true"}), 200
+            return jsonify({"messege": "success"}), 200
         else:
-            return jsonify({"verify": "false"}), 200
+            return jsonify({"detail": "invalid password"}), 401
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

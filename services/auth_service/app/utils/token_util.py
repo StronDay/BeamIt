@@ -11,13 +11,9 @@ import time
 from dotenv import load_dotenv
 import os
 
-class Token():
+class TokenUtil():
     
     def __init__(self):
-        
-        # algorithm = os.getenv('JWT_ALGORITHM')
-        # access_key = os.getenv('JWT_ACCESS_KEY')
-        # refresh_key = os.getenv('JWT_REFRESH_KEY')
         
         self._algorithm = os.getenv('JWT_ALGORITHM')
         self._access_key = os.getenv('JWT_ACCESS_KEY')
@@ -51,10 +47,7 @@ class Token():
             data_base.session.commit()
             
             return True
-
-        # except IntegrityError as e:
-        #     data_base.session.rollback()
-        #     return {"error": "User not found, invalid user_id"}, 400
+        
         except Exception as e:
             data_base.session.rollback()
             return {"error": str(e)}, 500

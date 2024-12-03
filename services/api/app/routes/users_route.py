@@ -4,13 +4,13 @@ from fastapi.responses import JSONResponse
 
 USER_SERVICE_URL = "http://user_service:5001"
 
-users_routers = APIRouter()
+users_route = APIRouter()
 
-@users_routers.get("/", response_class=JSONResponse)
+@users_route.get("/api/", response_class=JSONResponse)
 def home():
-    return {"message": "Home Page"}
+    return {"message": "API Page"}
 
-@users_routers.get("/user/{user_id}")
+@users_route.get("/api/user/{user_id}")
 async def get_user(user_id: str):
     try:
 
@@ -24,7 +24,7 @@ async def get_user(user_id: str):
     except requests.RequestException as e:
         return {"error": f"Error communicating with user service: {str(e)}"}, 500
     
-@users_routers.get("/users")
+@users_route.get("/api/users")
 async def get_users(user_id: str):
     try:
 
