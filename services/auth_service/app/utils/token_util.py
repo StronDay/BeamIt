@@ -21,7 +21,7 @@ class TokenUtil():
     
     def generateAccess(self, payload: dict):
         
-        payload["exp"] = datetime.now(timezone.utc) + timedelta(minutes=5)
+        payload["exp"] = datetime.now(timezone.utc) + timedelta(minutes=1)
         
         token = jwt.encode(payload, self._access_key, self._algorithm)
         return token

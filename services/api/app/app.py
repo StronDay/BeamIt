@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.routes import users_route
 from app.routes import auth_route
+from app.middlewares import JWTMiddleware
 
 def create_app():
    app = FastAPI()
@@ -13,6 +14,16 @@ def create_app():
       allow_methods=["*"],
       allow_headers=["*"],
       allow_credentials=True,
+   )
+   
+   JWT_ROUTES = [
+      "/api/user/{user_id}", 
+      "/api/users"
+   ]
+   
+   app.add_middleware(
+      JWTMiddleware, 
+      included_routes=JWT_ROUTES
    )
     
    app.include_router(users_route)
