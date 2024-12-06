@@ -8,7 +8,7 @@ USER_SERVICE_URL = "http://user_service:5001"
 users_route = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-@users_route.get("/api/", response_class=JSONResponse)
+@users_route.get("/api", response_class=JSONResponse)
 def home():
     return {"message": "API Page"}
 

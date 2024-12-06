@@ -13,6 +13,12 @@ services:
       - ./data_base:/var/lib/postgresql/data/
     expose:
       - POSTGRES_PORT
+    healthcheck:
+      test: ["CMD-SHELL", "export PGPASSWORD=${POSTGRES_PASSWORD} && pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} ; echo 'Test completed'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
     env_file:
       - .env
     networks:
@@ -61,6 +67,52 @@ services:
     networks:
       - app_network
   
+  # user_service:
+  #   container_name: user_service
+  #   build:
+  #     context: ./services/user_service
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ./services/user_service/:/user_service/
+  #   expose:
+  #     - 5001
+  #   healthcheck:
+  #     test: curl --fail http://api:5010
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   env_file:
+  #     - .env
+  #   networks:
+  #     - app_network
+  #     - db_network
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+
+  # auth_service:
+  #   container_name: auth_service
+  #   build:
+  #     context: ./services/auth_service
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ./services/auth_service/:/auth_service/
+  #   expose:
+  #     - 5003
+  #   healthcheck:
+  #     test: curl --fail http://api:5010
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   env_file:
+  #     - .env
+  #   networks:
+  #     - app_network
+  #     - db_network
+  #   depends_on:
+  #     postgres:
+  #       condition: service_healthy
+
   user_service:
     container_name: user_service
     build:
@@ -70,13 +122,19 @@ services:
       - ./services/user_service/:/user_service/
     expose:
       - 5001
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://api:5010/api"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     env_file:
       - .env
     networks:
       - app_network
       - db_network
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   auth_service:
     container_name: auth_service
@@ -87,10 +145,38 @@ services:
       - ./services/auth_service/:/auth_service/
     expose:
       - 5003
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://api:5010/api"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     env_file:
       - .env
     networks:
       - app_network
       - db_network
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+
+  test_api:
+    container_name: test_api
+    build:
+      context: ./tests/test_api
+      dockerfile: Dockerfile
+    volumes:
+      - ./tests/test_api/:/test_api/
+    expose:
+      - 4999
+    env_file:
+      - .env
+    networks:
+      - app_network
+    restart: "no"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      auth_service:
+        condition: service_healthy
+      user_service:
+        condition: service_healthy
