@@ -1,17 +1,20 @@
 from .models import data_base
+from mongoengine import Document, StringField, UUIDField
 
-from sqlalchemy import Column, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
-class TokenModel(data_base.Model):
-    __tablename__ = 'tokens'
+class TokenModel(data_base.Document):
+    meta = {
+        'collection': 'tokens'
+        # 'id_field': 'user_id'
+    }
 
-    user_id = data_base.Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    refresh_token = data_base.Column(data_base.Text, nullable=False)
-    
+    # id = None
+    user_id = UUIDField(default=uuid.uuid4)
+    refresh_token = StringField(required=True)
+
     def to_dict(self):
         return {
-            'user_id': self.user_id,
+            'user_id': str(self.user_id),
             'refresh_token': self.refresh_token
         }

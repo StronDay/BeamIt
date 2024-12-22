@@ -1,4 +1,3 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
+from flask_mongoengine import MongoEngine
 
-data_base = SQLAlchemy()
+data_base = MongoEngine()

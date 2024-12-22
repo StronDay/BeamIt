@@ -5,12 +5,10 @@ from app.routes import auth_route
 from app.models.models import data_base
 
 from .config import Config
-from flask_cors import CORS
 
 def create_app():
    
    app = Flask(__name__)
-   CORS(app)
    
    app.config.from_object(Config())
    
@@ -18,7 +16,7 @@ def create_app():
    app.register_blueprint(auth_route)
    
    data_base.init_app(app)
-   with app.app_context():
-      data_base.create_all()
+   # with app.app_context():
+   #    data_base.create_all()
     
    return app
