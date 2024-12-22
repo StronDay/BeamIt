@@ -9,6 +9,7 @@ services:
       dockerfile: .devcontainer/Dockerfile
     networks:
       - my_network
+      - mongo_network
     volumes:
       - .:/workspace
     ports:

@@ -7,3 +7,4 @@ __pycache__
 pg_admin
 mongo_db
 postgres_db
+auth_service_backup

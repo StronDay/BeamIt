@@ -38,7 +38,7 @@ services:
     env_file:
       - .env
     networks:
-      - postgres_network
+      - mongo_network
 
   pgadmin:
     image: dpage/pgadmin4
