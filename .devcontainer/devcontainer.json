@@ -18,6 +18,7 @@
         "ms-python.python",
         "ms-python.vscode-pylance",
         "ms-azuretools.vscode-docker",
+        "mongodb.mongodb-vscode",
         "/tmp/bee-c4-dsl-extension.vsix"
       ]
       

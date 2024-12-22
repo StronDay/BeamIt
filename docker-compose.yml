@@ -1,16 +1,18 @@
 networks:
   app_network:
     driver: bridge
-  db_network:
+  postgres_network:
+    driver: bridge
+  mongo_network:
     driver: bridge
 
 services:
 
   postgres:
     image: postgres:16.1
-    container_name: data_base
+    container_name: postgres_db
     volumes:
-      - ./data_base:/var/lib/postgresql/data/
+      - ./postgres_db:/var/lib/postgresql/data/
     expose:
       - POSTGRES_PORT
     healthcheck:
@@ -22,8 +24,21 @@ services:
     env_file:
       - .env
     networks:
-      - db_network
-  
+      - postgres_network
+
+  mongo:
+    image: mongo:5.0
+    container_name: mongo_db
+    volumes:
+      - ./mongo_db:/data/db
+    ports:
+      - ${MONGO_PORT}:${MONGO_PORT}
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+    env_file:
+      - .env
+    networks:
+      - postgres_network
 
   pgadmin:
     image: dpage/pgadmin4
@@ -35,9 +50,23 @@ services:
     env_file:
       - .env
     networks:
-      - db_network
+      - postgres_network
     depends_on:
       - postgres
+
+  # web_app:
+  #   container_name: web_app
+  #   build:
+  #     context: ./services/web_app
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ./services/web_app/:/web_app/
+  #   ports:
+  #     - 5020:5020
+  #   env_file:
+  #     - .env
+  #   networks:
+  #     - app_network
 
   api:
     container_name: api
@@ -66,52 +95,6 @@ services:
       - .env
     networks:
       - app_network
-  
-  # user_service:
-  #   container_name: user_service
-  #   build:
-  #     context: ./services/user_service
-  #     dockerfile: Dockerfile
-  #   volumes:
-  #     - ./services/user_service/:/user_service/
-  #   expose:
-  #     - 5001
-  #   healthcheck:
-  #     test: curl --fail http://api:5010
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
-  #   env_file:
-  #     - .env
-  #   networks:
-  #     - app_network
-  #     - db_network
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-
-  # auth_service:
-  #   container_name: auth_service
-  #   build:
-  #     context: ./services/auth_service
-  #     dockerfile: Dockerfile
-  #   volumes:
-  #     - ./services/auth_service/:/auth_service/
-  #   expose:
-  #     - 5003
-  #   healthcheck:
-  #     test: curl --fail http://api:5010
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
-  #   env_file:
-  #     - .env
-  #   networks:
-  #     - app_network
-  #     - db_network
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
 
   user_service:
     container_name: user_service
@@ -131,7 +114,7 @@ services:
       - .env
     networks:
       - app_network
-      - db_network
+      - postgres_network
     depends_on:
       postgres:
         condition: service_healthy
@@ -154,7 +137,7 @@ services:
       - .env
     networks:
       - app_network
-      - db_network
+      - postgres_network
     depends_on:
       postgres:
         condition: service_healthy

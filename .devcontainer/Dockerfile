@@ -39,15 +39,14 @@ COPY ./services/api/requirements.txt /tmp/api/requirements.txt
 COPY ./services/auth_service/requirements.txt /tmp/auth_service/requirements.txt
 COPY ./services/cipher_service/requirements.txt /tmp/cipher_service/requirements.txt
 COPY ./services/user_service/requirements.txt /tmp/user_service/requirements.txt
-
-# RUN pip install --no-cache-dir -r /tmp/api/requirements.txt
-# RUN pip install --no-cache-dir -r /tmp/user_service/requirements.txt
+COPY ./tests/test_api/requirements.txt /tmp/test_api/requirements.txt
 
 RUN pip install --no-cache-dir \
     -r /tmp/api/requirements.txt \
     -r /tmp/auth_service/requirements.txt \
     -r /tmp/cipher_service/requirements.txt \
-    -r /tmp/user_service/requirements.txt
+    -r /tmp/user_service/requirements.txt \
+    -r /tmp/test_api/requirements.txt
 
 RUN apt-get update && apt-get install -y zsh git curl
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"

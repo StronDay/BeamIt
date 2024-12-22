@@ -5,4 +5,5 @@ structurizr/themes
 structurizr/images
 __pycache__
 pg_admin
-data_base
+mongo_db
+postgres_db
