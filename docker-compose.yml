@@ -41,6 +41,19 @@ services:
     networks:
       - mongo_network
 
+  redis:
+    image: redis:latest
+    container_name: redis
+    networks:
+      - app_network
+    expose:
+      - "6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+
   pgadmin:
     image: dpage/pgadmin4
     container_name: pg_admin
@@ -53,7 +66,8 @@ services:
     networks:
       - postgres_network
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
   api:
     container_name: api
@@ -104,6 +118,8 @@ services:
       - postgres_network
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     restart: always
 

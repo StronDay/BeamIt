@@ -5,7 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from ..models import UsersModel
 from ..models import data_base
 
-from ..utils import is_user_existing, encrypt_password, create_new_user, get_user_password
+from ..utils import is_user_existing, encrypt_password, create_new_user, get_user_password, cache_get, cache_set
 
 CIPHER_SERVICE_URL = "http://cipher_service:5002"
 
@@ -27,6 +27,9 @@ def create_user():
 
         encrypted_passwd = encrypt_password(CIPHER_SERVICE_URL, passwd)
         new_user = create_new_user(data_base, login, encrypted_passwd, email)
+        
+        # Очистка кэша после добавления нового пользователя
+        cache_set('all_users', None)
 
         return jsonify({
             "message": "User created successfully",
@@ -82,18 +85,26 @@ def get_user(login):
 @users_route.route("/users/get_users", methods=['GET'])
 def get_users():
     try:
-        
+        # Проверяем кэш перед запросом в базу данных
+        cached_users = cache_get('all_users')
+        if cached_users:
+            return jsonify({"cashed": "true", "users": cached_users}), 200
+
+        # Если кэш пуст, запрашиваем данные из базы данных
         users = UsersModel.query.all()
         users_list = [
             {
-                "user_id": user.user_id,
+                "user_id": str(user.user_id),
                 "login": user.login,
                 "email": user.email
             }
             for user in users
         ]
 
-        return jsonify({"users": users_list}), 200
+        # Кэшируем данные на 2 минуты
+        cache_set('all_users', users_list, timeout=120)
+
+        return jsonify({"cashed": "false", "users": users_list}), 200
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500

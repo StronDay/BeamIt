@@ -18,7 +18,7 @@ def create_user():
     print(f"Created user {user_data['login']}: {response.json()}")
 
 def main():
-    for _ in range(10):  # Цикл на 15 пользователей
+    for _ in range(1500):
         create_user()
     sys.exit(0)
 

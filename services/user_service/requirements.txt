@@ -2,6 +2,7 @@ Flask
 Flask-SQLAlchemy
 sqlalchemy
 flask-cors
+redis
 
 gunicorn
 python-dotenv
