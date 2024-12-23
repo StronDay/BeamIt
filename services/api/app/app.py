@@ -17,7 +17,7 @@ def create_app():
    )
    
    JWT_ROUTES = [
-      "/api/user/{user_id}", 
+      "/api/user/.*",
       "/api/users"
    ]
    
